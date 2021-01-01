@@ -1,0 +1,44 @@
+{
+  "id": "2303751",
+  "name": "mini-vote",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "3550632",
+      "name": "群众",
+      "font_class": "group",
+      "unicode": "e669",
+      "unicode_decimal": 58985
+    },
+    {
+      "icon_id": "7127391",
+      "name": "x",
+      "font_class": "x",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "8017484",
+      "name": "empty",
+      "font_class": "empty",
+      "unicode": "e6a6",
+      "unicode_decimal": 59046
+    },
+    {
+      "icon_id": "10463900",
+      "name": "投票",
+      "font_class": "data",
+      "unicode": "e62c",
+      "unicode_decimal": 58924
+    },
+    {
+      "icon_id": "11125642",
+      "name": "相机",
+      "font_class": "camera",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    }
+  ]
+}

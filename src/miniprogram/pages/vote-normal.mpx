@@ -1,0 +1,231 @@
+<template>
+  <view class="main">
+    <input
+      class="title"
+      type="text"
+      placeholder="请在这里输入标题"
+      bindchange="setFormData('title', $event)"
+    />
+    <textarea
+      class="desc"
+      type="textarea" 
+      placeholder="请在这里输入描述信息" 
+      auto-height="{{true}}"
+      bindchange="setFormData('desc', $event)"
+    />
+    <view class="line"/>
+    <view class="form-item">
+      <view class="label">选择开始日期</view>
+      <picker mode="date" bindchange="setFormData('startTime', $event)">
+        <view class="value">{{ formData.startTime }}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <view class="label">选择结束日期</view>
+      <picker mode="date" bindchange="setFormData('endTime', $event)">
+        <view class="value">{{ formData.endTime }}</view>
+      </picker>
+    </view>
+    <view class="form-item">
+      <view class="label">最少投票数</view>
+      <view class="value">
+        <input type="number" value="1" bindchange="setFormData('min', $event)"/>
+      </view>
+    </view>
+    <view class="form-item">
+      <view class="label">最多投票数</view>
+      <view class="value">
+        <input type="number" value="2" bindchange="setFormData('max', $event)"/>
+      </view>
+    </view>
+    <view class="form-item">
+      <view class="label">是否匿名投票</view>
+      <switch color="#40a9ff" bindchange="setFormData('anonymous', $event)"/>
+    </view>
+    <view class="options">
+      <view class="item" wx:for="{{ formData.options }}" wx:key="id">
+        <view class="add-image">
+          <i class="iconfont icon-camera"></i>
+        </view>
+        <view class="content">
+          <input type="text" class="title" placeholder="请输入标题"/>
+          <input type="text" class="desc" placeholder="请输入描述-可不填"/>
+        </view>
+        <view class="remove" bindtap="remove(index)">
+          <i class="iconfont icon-x"></i>
+        </view>
+      </view>
+    </view>
+    <view class="add-option" bindtap="addOption">添加选项</view>
+    <view class="submit">提交投票</view>
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  createPage({
+    data: {
+      formData: {
+        title: '',
+        desc: '',
+        startTime: '2018-09-01',
+        endTime: '2018-10-02',
+        min: 1,
+        max: 1,
+        anonymous: false,
+        options: [
+          {
+            id: new Date().getTime(),
+            title: '',
+            desc: '',
+            image: ''
+          }
+        ]
+      },
+      optionAnonymous: [
+        { value: 1, name: '是' },
+        { value: 0, name: '否' }
+      ]
+    },
+    methods: {
+      setFormData (key, e) {
+        console.log(key, e.detail.value)
+        this.formData[key] = e.detail.value
+      },
+      addOption () {
+        console.log('option taped')
+        this.formData.options.push({
+          id: new Date().getTime(),
+          title: '',
+          desc: '',
+          image: ''
+        })
+      },
+      remove (index) {
+        if (this.formData.options.length < 2) {
+          wx.showToast({
+            title: '选项不能为空',
+            icon: 'none'
+          })
+          return
+        }
+        this.formData.options.splice(index, 1)
+      }
+    },
+    onLoad () {}
+  })
+</script>
+
+<script type="application/json">
+  {
+    "navigationBarTitleText": "普通投票",
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#ffffff",
+    "usingComponents": {
+    },
+    "disableScroll" : true
+  }
+</script>
+
+<style lang="stylus" scoped>
+@import url('../assets/iconfont/iconfont.css')
+.main
+  padding 20rpx
+  padding-bottom 120rpx
+
+  &>.title
+    font-size 40rpx
+    font-weight bold
+  
+  &>.desc
+    margin 30rpx 0
+    width 100%
+  
+  .line
+    width 100%
+    border-top 2rpx solid #e0e0e0
+
+  .form-item
+    display flex
+    justify-content space-between
+    margin 20rpx 0
+
+    .label
+      color #999
+    
+    .value
+      color #333
+      text-align right
+      font-weight bold
+
+    input 
+      padding-right 20rpx
+      font-weight bold
+  
+  .options
+    .item
+      margin-top 20rpx
+      position relative
+      border 2rpx solid #f2f2f2
+      border-radius 8rpx
+      padding 20rpx
+      display flex
+
+      .add-image
+        width 96rpx
+        height 96rpx
+        border-radius 50%
+        background #f2f2f2
+        border 2rpx solid e0e0e0
+        color #dbdbdb
+        display flex
+        justify-content center
+        align-items center
+
+        i
+          font-size 50rpx
+
+      .content
+        margin-left 20rpx
+
+        .title
+          font-size 32rpx
+          font-weight bold
+        .desc
+          font-size 24rpx
+      
+      .remove
+        position absolute
+        right 20rpx
+        top 50%
+        margin-top -24rpx
+        
+        i 
+          color #e0e0e0
+          font-size 32rpx
+
+  .add-option
+    border 2rpx solid #f2f2f2
+    border-radius 8rpx
+    text-align center
+    line-height 80rpx
+    font-size 28rpx
+    color #999
+    font-weight bold
+    margin-top 20rpx
+
+  .submit
+    position fixed
+    left 50%
+    margin-left -120rpx
+    bottom 30rpx
+    width 240rpx
+    height 80rpx
+    border-radius 40rpx
+    background #40a9ff
+    color white
+    font-size 32rpx 
+    font-weight bold
+    text-align center
+    line-height 80rpx
+</style>
