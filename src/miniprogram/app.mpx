@@ -1,16 +1,25 @@
 <script>
   import mpx, { createApp } from '@mpxjs/core'
   import apiProxy from '@mpxjs/api-proxy'
+  import env from './config/env'
+  console.log('env', env)
 
   mpx.use(apiProxy, { usePromise: true })
 
   createApp({
     onLaunch () {
+      wx.cloud.init({
+        env: 'pro-4grvcade3e1bbbec'
+      })
+      wx.getUserInfo()
     }
   })
 </script>
 
 <style>
+  view {
+    box-sizing: border-box
+  }
   /*此处编写全局样式*/
 </style>
 
@@ -18,7 +27,8 @@
   {
     "pages": [
       "./pages/index",
-      "./pages/vote-normal"
+      "./pages/vote-normal",
+      "./pages/login"
     ]
   }
 </script>

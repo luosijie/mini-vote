@@ -48,7 +48,7 @@
   }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
 @import url('../assets/iconfont/iconfont.css')
 .main
   width 100vw
