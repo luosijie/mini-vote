@@ -45,7 +45,8 @@
     <view class="options">
       <view class="item" wx:for="{{ formData.options }}" wx:key="id">
         <view class="add-image" bindtap="setOptionImage(index)">
-          <i class="iconfont icon-camera"></i>
+          <image src="{{ item.image }}" wx:if="{{ item.image }}" mode="aspectFill"></image>
+          <i class="iconfont icon-camera" wx:else></i>
         </view>
         <view class="content">
           <input type="text" class="title" placeholder="请输入标题" wx:model="{{ formData.options[index].title }}" bindchange="setOptionData('title', index, $event)"/>
@@ -58,11 +59,21 @@
     </view>
     <view class="add-option" bindtap="addOption">添加选项</view>
     <view class="submit" bindtap="addVote">提交投票</view>
+    <!-- 用来压缩图片 -->
+    <canvas
+      type="2d"
+      id="canvas_compress"
+      class="canvas-compress"
+      style="width: {{canvasCompress.width}}px; height: {{canvasCompress.height}}px"
+    />
   </view>
 </template>
 
 <script>
 import { createPage } from '@mpxjs/core'
+import loadImage from '../utils/loadImage'
+import compress from '../utils/compress'
+import checkImage from '../utils/checkImage'
 createPage({
   data: {
     formData: {
@@ -82,7 +93,11 @@ createPage({
         }
       ]
     },
-    optionAnonymous: [{ value: 1, name: '是' }, { value: 0, name: '否' }]
+    optionAnonymous: [{ value: 1, name: '是' }, { value: 0, name: '否' }],
+    canvasCompress: {
+      width: 0,
+      height: 0
+    }
   },
   methods: {
     // 校验表单数据
@@ -174,7 +189,26 @@ createPage({
       this.formData.options.splice(index, 1)
     },
     setOptionImage (index) {
-      wx.chooseImage(index)
+      wx.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success: async res => {
+          if (res.errMsg === 'chooseImage:ok') {
+            wx.showLoading({ title: '图片加载中' })
+            const path = res.tempFilePaths[0]
+            console.log('path', res)
+            const image = await loadImage.call(this, path, 'canvas_compress')
+            const filePath = await compress.call(this, image, 'canvas_compress')
+            const imgValid = await checkImage(filePath)
+            wx.hideLoading()
+            if (!imgValid) return
+            console.log('filepath', filePath)
+            this.formData.options[index].image = filePath
+            // 图片安全检测通过，执行图片插入操作
+          }
+        }
+      })
     }
   },
   onLoad () {
@@ -234,6 +268,8 @@ createPage({
       padding 20rpx
       display flex
       .add-image
+        overflow hidden
+        position relative
         width 96rpx
         height 96rpx
         border-radius 50%
@@ -245,6 +281,9 @@ createPage({
         align-items center
         i
           font-size 50rpx
+        image
+          width 100%
+          height 100%
       .content
         margin-left 20rpx
         .title
@@ -269,6 +308,7 @@ createPage({
     color #999
     font-weight bold
     margin-top 20rpx
+
   .submit
     position fixed
     left 50%
@@ -283,4 +323,9 @@ createPage({
     font-weight bold
     text-align center
     line-height 80rpx
+
+  .canvas-compress
+    position absolute
+    left 0
+    top 1000px
 </style>
