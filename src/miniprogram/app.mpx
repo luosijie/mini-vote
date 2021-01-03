@@ -27,7 +27,7 @@
   {
     "pages": [
       "./pages/index",
-      "./pages/vote-normal",
+      "./pages/vote-detail",
       "./pages/new-vote",
       "./pages/login"
     ]

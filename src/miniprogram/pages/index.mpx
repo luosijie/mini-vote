@@ -26,7 +26,7 @@
           <text>暂无数据</text>
         </view>
         <view class="data" wx:else>
-          <view class="item" wx:for="{{ records }}" wx:key="_id">
+          <view class="item" wx:for="{{ records }}" wx:key="_id" bindtap="toDetail(item._id)">
             <text class="title">{{ item.title }}</text>
             <view class="desc">
               <text class="status">进行中</text>
@@ -70,6 +70,12 @@
         this.records = res.result.data
         this.total = res.result.total
         console.log('ers of getRecords', res)
+      },
+      toDetail (_id) {
+        wx.navigateTo({
+          url: `vote-detail?_id=${_id}`
+        })
+        console.log('to-detial', _id)
       }
     },
     onLoad () {

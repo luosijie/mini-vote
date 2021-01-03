@@ -222,7 +222,7 @@ createPage({
 
 <script type="application/json">
   {
-    "navigationBarTitleText": "普通投票",
+    "navigationBarTitleText": "新建投票",
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#ffffff",
     "usingComponents": {
