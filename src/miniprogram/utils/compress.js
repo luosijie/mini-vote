@@ -57,7 +57,7 @@ export default function (image, canvasId, config = { maxWidth: 750, maxHeight: 1
               resolve(res.tempFilePath)
             }
           },
-          fail(err) {
+          fail (err) {
             reject(err)
           }
         })

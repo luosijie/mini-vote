@@ -1,7 +1,7 @@
 <template>
   <view class="main">
     <view class="menu">
-      <view class="item vote">
+      <view class="item vote" bindtap="navigateTo('new-vote?type=normal')">
         <view class="icon">
           <i class="iconfont icon-data"></i>
         </view>
@@ -14,16 +14,31 @@
         <text>PK投票</text>
       </view>
     </view>
-    <view class="record">
+    <view class="records">
       <view class="top">
         <view class="line"></view>
         <text>投票记录</text>
         <view class="line"></view>
       </view>
       <view class="content">
-        <view class="empty">
+        <view class="empty" wx:if="{{ !total }}">
           <i class="iconfont icon-empty"></i>
           <text>暂无数据</text>
+        </view>
+        <view class="data" wx:else>
+          <view class="item" wx:for="{{ records }}" wx:key="_id">
+            <text class="title">{{ item.title }}</text>
+            <view class="desc">
+              <text class="status">进行中</text>
+              <text>单选</text>
+              <text>匿名</text>
+              <text>已投票23人</text>
+            </view>
+            <view class="date">
+              <text>开始日期: {{ item.startTime }}</text>
+              <text>截止日期: {{ item.endTime }}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -33,7 +48,33 @@
 <script>
   import { createPage } from '@mpxjs/core'
   createPage({
-    onLoad () {}
+    data: {
+      total: 0,
+      records: []
+    },
+    methods: {
+      navigateTo (url) {
+        console.log('navigate', url)
+        wx.navigateTo({
+          url
+        })
+      },
+      async getRecords () {
+        const res = await wx.cloud.callFunction({
+          name: 'getRecords',
+          data: {
+            size: 10,
+            no: 1
+          }
+        })
+        this.records = res.result.data
+        this.total = res.result.total
+        console.log('ers of getRecords', res)
+      }
+    },
+    onLoad () {
+      this.getRecords()
+    }
   })
 </script>
 
@@ -88,7 +129,7 @@
         i
           font-size 48rpx
 
-      txt
+      text
         font-size 30rpx
         color #333
         font-weight bold
@@ -105,11 +146,12 @@
       .icon
         background-image linear-gradient(to top right, #EE4519, #F87B36)
 
-  .record
+  .records
     height calc(100vh - 400rpx)
     display flex
     flex-direction column
     align-items center
+    padding 20rpx
 
     .top
       width 100%
@@ -132,10 +174,9 @@
         background #f2f2f2
 
     .content
+      width 100%
       height calc(100% - 60rpx)
-      display flex
-      justify-content center
-      align-items center
+      overflow auto
 
       .empty
         display flex
@@ -150,4 +191,29 @@
           font-size 24rpx
           color #bbb
           margin 30rpx 0
+
+      .data
+        &>.item
+          border 2rpx solid #f2f2f2
+          margin 20rpx 0
+          padding 10rpx
+
+          .title
+            font-weight bold
+
+          .desc
+            color #666
+            font-size 28rpx
+            margin-top 10rpx
+
+            &>text
+              margin-right 20rpx
+          
+          .date
+            color #666
+            font-size 28rpx
+            margin-top 10rpx
+
+            &>text
+              margin-right 20rpx
 </style>

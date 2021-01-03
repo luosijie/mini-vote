@@ -17,10 +17,24 @@ exports.main = async (event, context) => {
     options: event.options,
     state: 'ing'
   }
-  console.log('evnet params :', data)
   const res = await voteCollection.add({
     data
   })
+  console.log('evnet params :', res)
+  const options = data.options
+  const optionCollection = db.collection('options')
+  const optionPromise = options.map(async ele => {
+    const option = {
+      vote_id: res._id,
+      ...ele
+    }
+    return await optionCollection.add({
+      data: option
+    })
+  })
+  let resOptions = await Promise.all(optionPromise)
+  resOptions = resOptions.map(e =>  e._id)
+  console.log('res after add', res, resOptions)
   return {
     ...res
   }

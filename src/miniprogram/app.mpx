@@ -28,6 +28,7 @@
     "pages": [
       "./pages/index",
       "./pages/vote-normal",
+      "./pages/new-vote",
       "./pages/login"
     ]
   }
