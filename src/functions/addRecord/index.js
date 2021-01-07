@@ -14,21 +14,21 @@ exports.main = async (event, context) => {
     startTime: event.startTime,
     endTime: event.endTime,
     type: event.type,
-    options: event.options,
     state: 'ing'
   }
   const res = await voteCollection.add({
     data
   })
   console.log('evnet params :', res)
-  const options = data.options
+  const options = event.options
   const optionCollection = db.collection('options')
-  const optionPromise = options.map(async ele => {
+  const optionPromise = options.map( ele => {
     const option = {
       vote_id: res._id,
       ...ele
     }
-    return await optionCollection.add({
+    console.log('option--->', option)
+    return optionCollection.add({
       data: option
     })
   })

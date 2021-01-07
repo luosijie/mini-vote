@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "5466017",
+      "name": "check",
+      "font_class": "uncheck",
+      "unicode": "e70f",
+      "unicode_decimal": 59151
+    },
+    {
+      "icon_id": "11903700",
+      "name": "check",
+      "font_class": "check",
+      "unicode": "e65a",
+      "unicode_decimal": 58970
+    },
+    {
+      "icon_id": "6170774",
+      "name": "更多",
+      "font_class": "more",
+      "unicode": "e617",
+      "unicode_decimal": 58903
+    },
+    {
       "icon_id": "3550632",
       "name": "群众",
       "font_class": "group",

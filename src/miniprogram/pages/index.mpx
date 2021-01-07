@@ -61,7 +61,7 @@
       },
       async getRecords () {
         const res = await wx.cloud.callFunction({
-          name: 'getRecords',
+          name: 'getRecordPage',
           data: {
             size: 10,
             no: 1

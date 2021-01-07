@@ -171,12 +171,12 @@ createPage({
       console.log('form-data', this.formData)
       const valid = this.validateFormData()
       if (!valid) return
-      console.log('add-vote', this.formData, wx.cloud)
+      console.log('addRecord', this.formData, wx.cloud)
       const res = await wx.cloud.callFunction({
-        name: 'addVote',
+        name: 'addRecord',
         data: this.formData
       })
-      console.log('result in addVote', res)
+      console.log('新增投票成功', res)
     },
     remove (index) {
       if (this.formData.options.length < 2) {
