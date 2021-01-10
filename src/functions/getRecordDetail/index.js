@@ -9,9 +9,10 @@ const db = cloud.database()
 
 exports.main = async (event, context) => {
   const _id = event._id
-  // 投票信息
+  const OPENID = cloud.getWXContext().OPENID
+  // 查找投票信息
   const voteCollection = db.collection('votes')
-  const votes = await voteCollection
+  const voteQuery = await voteCollection
   .aggregate()
   .match({ _id })
   .lookup({
@@ -20,20 +21,36 @@ exports.main = async (event, context) => {
     foreignField: 'OPENID',
     as: 'creator'
   })
-  .lookup({
-    from: 'options',
-    localField: '_id',
-    foreignField: 'vote_id',
-    as: 'options'
-  })
   .end()
-  // 选项信息
   let vote = {}
-  if (votes && votes.list.length) {
-    vote = votes.list[0]
+  console.log('vote-query', voteQuery, _id)
+  if (voteQuery && voteQuery.list.length) {
+    vote = voteQuery.list[0]
     vote.creator = vote.creator[0]
-  }
-  return {
-    ...vote
+    vote.isOwner = vote.creator.OPENID === OPENID
+
+    // 查找选项信息
+    const optionsCollection = db.collection('options')
+    const optionsQuary = await optionsCollection
+    .aggregate()
+    .match({ vote_id: _id })
+    .lookup({
+      from: 'users',
+      localField: 'users',
+      foreignField: 'OPENID',
+      as: 'users'
+    })
+    .end()
+    vote.options = optionsQuary.list
+    
+    return {
+      success: true,
+      data: vote
+    }
+  } else {
+    return {
+      success: false,
+      data: '找不到投票信息'
+    }
   }
 }

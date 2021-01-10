@@ -14,6 +14,7 @@ exports.main = async (event, context) => {
   voteOptions = voteOptions.data
   // 判断是否投过票
   let curOptionUsers = []
+  console.log('vote-options', voteOptions)
   for (let i = 0; i < voteOptions.length; i++) {
     const users = voteOptions[i].users
     if (voteOptions[i]._id === _id) {
@@ -23,7 +24,7 @@ exports.main = async (event, context) => {
       if (users.indexOf(OPENID) > -1) {
         return {
           success: false,
-          data: '您已经投过票了'
+          message: '您已经投过票了'
         }
       }
     }
@@ -36,6 +37,7 @@ exports.main = async (event, context) => {
   })
   return {
     success: true,
-    data: res
+    data: res,
+    message: '投票成功'
   }
 }

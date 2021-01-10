@@ -10,6 +10,7 @@
     onLaunch () {
       wx.cloud.init({
         env: 'pro-4grvcade3e1bbbec'
+        // env: 'dev-2g1tva2ifc3f29ec'
       })
       wx.getUserInfo()
     }
@@ -17,10 +18,10 @@
 </script>
 
 <style>
+  /*此处编写全局样式*/
   view {
     box-sizing: border-box
   }
-  /*此处编写全局样式*/
 </style>
 
 <script type="application/json">

@@ -1,6 +1,6 @@
 {
+  "env": "dev-2g1tva2ifc3f29ec",
   "permissions": {
-    "env": "dev-2g1tva2ifc3f29ec",
     "openapi": [
       "security.imgSecCheck"
     ]

@@ -22,10 +22,10 @@
             <view class="info">
               <view class="top">
                 <text class="title">{{ item.title }}</text>
-                <text class="nums">21票</text>
+                <text class="nums">{{ item.users.length }}票</text>
               </view>
               <view class="bottom">
-                撒打算打算打算大的撒上点
+                {{  item.desc }}
               </view>
             </view>
             <view class="action">
@@ -50,7 +50,9 @@ import { createPage } from '@mpxjs/core'
 createPage({
   data: {
     detail: null,
-    selected: null
+    selected: null,
+    user: null,
+    isVoted: false
   },
   methods: {
     async getDetail (_id) {
@@ -60,8 +62,20 @@ createPage({
           _id
         }
       })
-      console.log('res.result', res.result)
-      this.detail = res.result
+      this.detail = res.result.data
+      // 判断是否已经投过票
+      const options = this.detail.options
+      for (let i = 0; i < options.length; i++) {
+        if (this.isVoted) break
+        const users = options[i].users
+        for (let j = 0; j < users.length; j++) {
+          console.log('users', users[j])
+          if (users[j].OPENID === this.user.OPENID) {
+            this.isVoted = true
+            break
+          }
+        }
+      }
     },
     select (_id) {
       console.log('selected_id', _id)
@@ -86,6 +100,8 @@ createPage({
   },
   onLoad (e) {
     const _id = e._id
+    this.user = wx.getStorageSync('user')
+    console.log('onload-user', this.user)
     this.getDetail(_id)
   }
 })
