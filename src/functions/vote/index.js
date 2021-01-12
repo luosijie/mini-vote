@@ -14,21 +14,24 @@ exports.main = async (event, context) => {
   voteOptions = voteOptions.data
   // 判断是否投过票
   let curOptionUsers = []
-  console.log('vote-options', voteOptions)
   for (let i = 0; i < voteOptions.length; i++) {
     const users = voteOptions[i].users
-    if (voteOptions[i]._id === _id) {
-      curOptionUsers = users
-    }
+    // console.log('_id', voteOptions[i])
     if (users && users.length) {
-      if (users.indexOf(OPENID) > -1) {
-        return {
-          success: false,
-          message: '您已经投过票了'
+      if (voteOptions[i]._id === _id) {
+        curOptionUsers = users
+      }
+      if (users && users.length) {
+        if (users.indexOf(OPENID) > -1) {
+          return {
+            success: false,
+            message: '您已经投过票了'
+          }
         }
       }
     }
   }
+  curOptionUsers.push(OPENID)
   // 更新投票信息
   const res = await options.where({ _id }).update({
     data: {

@@ -22,6 +22,9 @@
   view {
     box-sizing: border-box
   }
+  view, text {
+    color: #333
+  }
 </style>
 
 <script type="application/json">

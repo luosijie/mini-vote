@@ -77,6 +77,7 @@ import checkImage from '../utils/checkImage'
 createPage({
   data: {
     formData: {
+      type: '',
       title: '',
       desc: '',
       startTime: '2018-09-01',
@@ -176,7 +177,15 @@ createPage({
         name: 'addRecord',
         data: this.formData
       })
-      console.log('新增投票成功', res)
+      if (res.result.success) {
+        wx.showToast({
+          title: '新增投票成功',
+          icon: 'success'
+        })
+        wx.redirectTo({
+          url: `vote-detail?_id=${res.result._id}`
+        })
+      }
     },
     remove (index) {
       if (this.formData.options.length < 2) {
@@ -211,7 +220,8 @@ createPage({
       })
     }
   },
-  onLoad () {
+  onLoad (e) {
+    this.formData.type = e.type
     const today = new Date()
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
     this.formData.startTime = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`
@@ -222,7 +232,7 @@ createPage({
 
 <script type="application/json">
   {
-    "navigationBarTitleText": "新建投票",
+    "navigationBarTitleText": "新增投票",
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#ffffff",
     "usingComponents": {

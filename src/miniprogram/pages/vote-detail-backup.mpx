@@ -13,14 +13,38 @@
         </view>
         <text class="end">截止日期：2012-09-12</text>
       </view>
-      <view class="options">
+      <view class="options" wx:if="{{ detail.type === 'normal' }}">
         <view class="item" wx:for="{{ detail.options }}" wx:key="title">
           <view class="content" bindtap="select(item._id)">
-            <view class="image" wx:if="{{ showImage }}">
-              <image src="{{ item.image }}" alt="" mode="aspectFill" wx:if="{{ item.image }}"/>
-              <view class="image-default" wx:else>
-                <i class="iconfont icon-group"></i>
+            <view class="info">
+              <view class="top">
+                <text class="title">{{ item.title }}</text>
               </view>
+              <view class="bottom">
+                {{  item.desc }}
+              </view>
+            </view>
+            <view class="action" wx:if="{{ !isVoted }}">
+              <i class="iconfont icon-check" wx:if="{{ item._id === selected }}"></i>
+              <i class="iconfont icon-uncheck" wx:else></i>
+            </view>
+            <text class="nums" wx:else>{{ item.users.length }}票</text>
+          </view>
+          <view class="users">
+            <view class="item" wx:for="{{ item.users }}" wx:if="{{ index < 14 }}" wx:key="avatarUrl">
+              <image src="{{ item.avatarUrl }}" mode="aspectFill"></image>
+            </view>
+            <view class="item" wx:if="{{ item.users.length > 14  }}">
+              <i class="iconfont icon-more"></i>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="options" wx:else>
+        <view class="item" wx:for="{{ detail.options }}" wx:key="title">
+          <view class="content" bindtap="select(item._id)">
+            <view class="image">
+              <image src="{{ item.image }}" alt="" mode="aspectFill"/>
             </view>
             <view class="info">
               <view class="top">
@@ -58,8 +82,7 @@ createPage({
     detail: null,
     selected: null,
     user: null,
-    isVoted: false,
-    showImage: false
+    isVoted: false
   },
   methods: {
     async getDetail (_id) {
@@ -71,10 +94,8 @@ createPage({
       })
       this.detail = res.result.data
       console.log('投票详情：', this.detail)
-      const options = this.detail.options
-      // 判断是否显示图片
-      this.showImage = options.find(e => e.image)
       // 判断是否已经投过票
+      const options = this.detail.options
       for (let i = 0; i < options.length; i++) {
         if (this.isVoted) break
         const users = options[i].users
@@ -88,7 +109,6 @@ createPage({
       }
     },
     select (_id) {
-      if (this.isVoted) return
       console.log('selected_id', _id)
       this.selected = _id
     },
@@ -100,9 +120,6 @@ createPage({
         })
         return
       }
-      wx.showLoading({
-        title: '提交中...'
-      })
       const res = await wx.cloud.callFunction({
         name: 'vote',
         data: {
@@ -110,7 +127,6 @@ createPage({
           voteId: this.detail._id
         }
       })
-      wx.hideLoading()
       console.log('投票结果', res.result)
       if (res.result.success) {
         wx.showToast({
@@ -155,16 +171,14 @@ createPage({
     padding-bottom 130rpx
 
     &>.info
-      border 2rpx solid #f2f2f2
-      padding 40rpx 20rpx
+      margin 20rpx 0 40rpx
 
       &>.title
-        font-size 36rpx
+        font-size 40rpx
         font-weight bold
-        margin-bottom 20rpx
+        margin-bottom 10rpx
 
       &>.desc
-        font-size 28rpx
         color #666
     
     .info-more
@@ -179,8 +193,8 @@ createPage({
         align-items center
 
         .photo
-          width 30rpx
-          height 30rpx
+          width 40rpx
+          height 40rpx
           border-radius 50%
           background #f8f8f8
           margin-right 10rpx
@@ -192,32 +206,18 @@ createPage({
 
         .content
           position relative
-          height 150rpx
           border 2rpx solid #f2f2f2
           border-radius 8rpx
           overflow hidden
           display flex
-          align-items center
-
           
           &>.image
             width 150rpx
-            height 100%
             position relative
 
             image
               width 100%
               height 100%
-
-            .image-default
-              background #f2f2f2
-              height 100%
-              display flex
-              align-items center
-              justify-content center
-              color #999
-              i
-                font-size 50rpx
 
           &>.info
             padding 20rpx
@@ -226,7 +226,6 @@ createPage({
               
               .title
                 font-weight bold
-                font-size 30rpx
             
             .bottom
               color #666
