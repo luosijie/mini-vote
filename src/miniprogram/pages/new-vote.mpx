@@ -26,16 +26,16 @@
         <view class="value">{{ formData.endTime }}</view>
       </picker>
     </view>
-    <view class="form-item">
+    <view class="form-item" wx:if="{{ formData.type === 'normal' }}">
       <view class="label">最少投票数</view>
       <view class="value">
         <input type="number" value="1" bindchange="setFormData('min', $event)" />
       </view>
     </view>
-    <view class="form-item">
+    <view class="form-item" wx:if="{{ formData.type === 'normal' }}">
       <view class="label">最多投票数</view>
       <view class="value">
-        <input type="number" value="2" bindchange="setFormData('max', $event)" />
+        <input type="number" value="1" bindchange="setFormData('max', $event)" />
       </view>
     </view>
     <view class="form-item">
@@ -52,12 +52,12 @@
           <input type="text" class="title" placeholder="请输入标题" wx:model="{{ formData.options[index].title }}" bindchange="setOptionData('title', index, $event)"/>
           <input type="text" class="desc" placeholder="请输入描述-可不填" wx:model="{{ formData.options[index].desc }}" />
         </view>
-        <view class="remove" bindtap="remove(index)">
+        <view class="remove" bindtap="remove(index)" wx:if="{{ formData.type === 'normal' }}">
           <i class="iconfont icon-x"></i>
         </view>
       </view>
     </view>
-    <view class="add-option" bindtap="addOption">添加选项</view>
+    <view class="add-option" bindtap="addOption" wx:if="{{ formData.type === 'normal' }}">添加选项</view>
     <view class="submit" bindtap="addVote">提交投票</view>
     <!-- 用来压缩图片 -->
     <canvas
@@ -85,14 +85,7 @@ createPage({
       min: 1,
       max: 1,
       anonymous: false,
-      options: [
-        {
-          id: new Date().getTime(),
-          title: '',
-          desc: '',
-          image: ''
-        }
-      ]
+      options: []
     },
     optionAnonymous: [{ value: 1, name: '是' }, { value: 0, name: '否' }],
     canvasCompress: {
@@ -226,6 +219,24 @@ createPage({
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
     this.formData.startTime = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`
     this.formData.endTime = `${tomorrow.getFullYear()}-${tomorrow.getMonth() + 1}-${tomorrow.getDate()}`
+    this.formData.options.push(
+      {
+        id: new Date().getTime(),
+        title: '',
+        desc: '',
+        image: ''
+      }
+    )
+    if (this.formData.type === 'pk') {
+      this.formData.options.push(
+        {
+          id: new Date().getTime() + 1,
+          title: '',
+          desc: '',
+          image: ''
+        }
+      )
+    }
   }
 })
 </script>

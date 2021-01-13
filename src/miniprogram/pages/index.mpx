@@ -7,7 +7,7 @@
         </view>
         <text>普通投票</text>
       </view>
-      <view class="item pk">
+      <view class="item pk" bindtap="navigateTo('new-vote?type=pk')">
         <view class="icon">
           <i class="iconfont icon-group"></i>
         </view>
