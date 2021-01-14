@@ -14,6 +14,8 @@ exports.main = async (event, context) => {
     startTime: event.startTime,
     endTime: event.endTime,
     anonymous: event.anonymous,
+    min: event.min,
+    max: event.max,
     type: event.type,
     state: 'ing'
   }

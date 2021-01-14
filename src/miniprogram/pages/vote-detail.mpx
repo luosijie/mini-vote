@@ -2,42 +2,60 @@
   <view class="main">
     <div class="loaging" wx:if="{{ !detail }}"></div>
     <view class="detail" wx:else>
-      <view class="info-pk info" wx:if="{{ detail.type === 'pk' }}">
+      <view class="info-top">
+        <text class="date">开始日期: {{ detail.startTime }}</text>
+        <status state="{{ detail.state }}" style="margin-right: 20rpx"/>
+        <text class="date">截止日期: {{ detail.endTime }}</text>
+      </view>
+      <view class="info info-pk" wx:if="{{ detail.type === 'pk' }}">
         <text class="title">{{ detail.title }}</text>
         <view class="pkers">
           <view class="option">
             <view class="pker">
-              <image src="{{ detail.options[0].image }}"></image>
+              <image src="{{ detail.options[0].image }}" wx:if="{{ detail.options[0].image }} }}"></image>
               <text class="name">{{ detail.options[0].title }}</text>
             </view>
-            <text class="num blue">1</text>
+            <text class="num blue">{{ detail.options[0].users.length }}</text>
           </view>
           <text class="pk">PK</text>
           <view class="option">
             <view class="pker">
-              <image src="{{ detail.options[1].image }}"></image>
+              <image src="{{ detail.options[1].image }}" wx:if="{{ detail.options[0].image }} }}"></image>
               <text class="name">{{ detail.options[1].title }}</text>
             </view>
-            <text class="num red">1</text>
+            <text class="num red">{{ detail.options[1].users.length }}</text>
           </view>
         </view>
         <view class="shape">
-          <view class="blue"></view>
+          <view class="blue" wx:style="{{ {width: `${detail.options[0].users.length / votedTotal * 100}%`} }}"></view>
           <view class="red"></view>
         </view>
+        <view class="actions">
+          <view class="blue" bindtap="vote(detail.options[0]._id)">
+            <i class="iconfont icon-zan"></i>
+          </view>
+          <view class="red" bindtap="vote(detail.options[1]._id)">
+            <i class="iconfont icon-zan"></i>
+          </view>
+        </view>
+        <view class="show-support">
+          <text>查看支持者</text>
+          <text>查看支持者</text>
+        </view>
       </view>
-      <view class="info"  wx:if="{{ detail.type === 'normal' }}">
+      <view class="info" wx:if="{{ detail.type === 'normal' }}">
         <view class="title">{{ detail.title }}</view>
         <view class="desc">{{ detail.desc }}</view>
       </view>
-      <view class="info-more">
+      <view class="info-bottom">
         <view class="creator">
           <image class="photo" src="{{ detail.creator.avatarUrl }}"></image>
           <text class="name">发起人：{{ detail.creator.nickName }}</text>
         </view>
-        <text class="end">截止日期：2012-09-12</text>
+        <text class="end" style="margin-right: 20rpx" wx:if="{{ detail.anonymous }}">匿名投票</text>
+        <text class="end" style="margin-right: 20rpx">每人最少{{ detail.min }}投票，最多投{{ detail.max }}票</text>
       </view>
-      <view class="options">
+      <view class="options" wx:if="{{ detail.type === 'normal' }}">
         <view class="item" wx:for="{{ detail.options }}" wx:key="title">
           <view class="content" bindtap="select(item._id)">
             <view class="image" wx:if="{{ showImage }}">
@@ -70,7 +88,7 @@
           </view>
         </view>
       </view>
-      <view class="submit" bindtap="submit" wx:if="{{ !isVoted }}">提交</view>
+      <view class="submit" bindtap="submit" wx:if="{{ !isVoted && detail.type === 'normal' }}">提交</view>
     </view>
   </view>
 </template>
@@ -83,7 +101,8 @@ createPage({
     selected: null,
     user: null,
     isVoted: false,
-    showImage: false
+    showImage: false,
+    votedTotal: 0
   },
   methods: {
     async getDetail (_id) {
@@ -102,8 +121,10 @@ createPage({
       for (let i = 0; i < options.length; i++) {
         if (this.isVoted) break
         const users = options[i].users
+        if (users.length) {
+          this.votedTotal += users.length
+        }
         for (let j = 0; j < users.length; j++) {
-          console.log('users', users[j])
           if (users[j].OPENID === this.user.OPENID) {
             this.isVoted = true
             break
@@ -116,21 +137,14 @@ createPage({
       console.log('selected_id', _id)
       this.selected = _id
     },
-    async submit () {
-      if (!this.selected) {
-        wx.showToast({
-          title: '请先选择',
-          icon: 'none'
-        })
-        return
-      }
+    async vote (optionId) {
       wx.showLoading({
         title: '提交中...'
       })
       const res = await wx.cloud.callFunction({
         name: 'vote',
         data: {
-          optionId: this.selected,
+          optionId,
           voteId: this.detail._id
         }
       })
@@ -148,6 +162,16 @@ createPage({
           icon: 'error'
         })
       }
+    },
+    async submit () {
+      if (!this.selected) {
+        wx.showToast({
+          title: '请先选择',
+          icon: 'none'
+        })
+        return
+      }
+      this.vote(this.selected)
     }
   },
   onLoad (e) {
@@ -165,7 +189,8 @@ createPage({
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#ffffff",
     "usingComponents": {
-    }
+      "status": "../components/status"
+    },
     // "disableScroll" : true
   }
 </script>
@@ -178,7 +203,21 @@ createPage({
     padding 20rpx
     padding-bottom 130rpx
 
+    &>.info
+      border 2rpx solid #f2f2f2
+      padding 40rpx 20rpx
+
+      &>.title
+        font-size 36rpx
+        font-weight bold
+        margin-bottom 20rpx
+
+      &>.desc
+        font-size 28rpx
+        color #666
+
     &>.info-pk
+      padding 80rpx 20rpx
       display flex
       flex-direction column
       justify-content center
@@ -188,6 +227,7 @@ createPage({
         display flex
         align-items flex-start
         margin 20rpx 0
+        width 100%
 
         text.pk
           margin 10rpx 80rpx
@@ -199,6 +239,7 @@ createPage({
           display flex
           flex-direction column
           align-items center
+          width 50%
 
           .pker
             display flex
@@ -228,6 +269,8 @@ createPage({
         display flex
         border-radius 14rpx 0 14rpx 0
         overflow hidden
+        background #f2f2f2
+
 
         view
           width 50%
@@ -238,30 +281,61 @@ createPage({
           
           &.red
             background #EF4C1D
+      
+      .actions
+        width 100%
+        display flex
+        justify-content space-around
+        margin-top  60rpx
+
+        view
+          width  100rpx
+          height 100rpx
+          border 2rpx solid #eee
+          border-radius 50%
+          text-align center
+          line-height 100rpx
+
+          i
+            font-size 40rpx
+
+          &.blue i
+            color #43ABFF
           
-    &>.info
-      border 2rpx solid #f2f2f2
-      padding 40rpx 20rpx
+          &.red i
+            color #EF4C1D
+           
+      
+      .show-support
+        margin-top 50rpx
+        width 100%
+        display flex
+        justify-content space-around
+        font-size 20rpx
 
-      &>.title
-        font-size 36rpx
-        font-weight bold
-        margin-bottom 20rpx
+        text
+          color #999
 
-      &>.desc
-        font-size 28rpx
-        color #666
-    
-    .info-more
+
+    .info-top
       display flex
       justify-content space-between
-      color  #999
-      font-size 24rpx
       margin 20rpx 0 30rpx
+      font-size 24rpx
+
+      text
+        color #999
+    
+    .info-bottom
+      display flex
+      justify-content center
+      margin 20rpx 0 30rpx
+      font-size 24rpx
 
       .creator
         display flex
         align-items center
+        margin-right 20rpx
 
         .photo
           width 30rpx
@@ -269,6 +343,9 @@ createPage({
           border-radius 50%
           background #f8f8f8
           margin-right 10rpx
+
+      text
+        color  #999
 
     .options
       &>.item
