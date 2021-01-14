@@ -43,6 +43,16 @@ exports.main = async (event, context) => {
     .end()
     vote.options = optionsQuary.list
     
+    if (vote.state !== 'end') {
+      // 未开始
+      if (new Date().getTime() < new Date(vote.startTime).getTime()) {
+        vote.state = 'pre'
+      }
+      // 已过期 = 已结束
+      if (new Date().getTime() > new Date(vote.endTime).getTime()) {
+        vote.state = 'end'
+      }
+    }
     return {
       success: true,
       data: vote

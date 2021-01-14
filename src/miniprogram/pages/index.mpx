@@ -29,14 +29,17 @@
           <view class="item" wx:for="{{ records }}" wx:key="_id" bindtap="toDetail(item._id)">
             <text class="title">{{ item.title }}</text>
             <view class="desc">
-              <text class="status">进行中</text>
-              <text>单选</text>
-              <text>匿名</text>
-              <text>已投票23人</text>
+              <status state="{{ item.state }}" style="margin-right: 10rpx"/>
+              <text wx:if="{{ item.anonymous }}">匿名</text>
+              <text>已投票 {{ item.votedTotal }} 人</text>
             </view>
             <view class="date">
-              <text>开始日期: {{ item.startTime }}</text>
-              <text>截止日期: {{ item.endTime }}</text>
+              <text>开始: {{ item.endTime }}</text>
+              <text>截止: {{ item.endTime }}</text>
+            </view>
+            <view class="mark" wx:if="{{ item.type === 'pk' }}">
+              <text class="p">P</text>
+              <text class="k">K</text>
             </view>
           </view>
         </view>
@@ -73,7 +76,7 @@
         wx.hideLoading()
         this.records = res.result.data
         this.total = res.result.total
-        console.log('ers of getRecords', res)
+        console.log('records', this.records)
       },
       toDetail (_id) {
         wx.navigateTo({
@@ -94,6 +97,7 @@
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#ffffff",
     "usingComponents": {
+      "status": "../components/status"
     },
     "disableScroll" : true
   }
@@ -204,26 +208,42 @@
 
       .data
         &>.item
+          position relative
           border 2rpx solid #f2f2f2
           margin 20rpx 0
-          padding 10rpx
+          padding 20rpx
+          border-radius 8rpx
+
+          .mark
+            position absolute
+            right 10rpx
+            top 10rpx
+            font-weight bold
+            font-size 24rpx
+
+            text.p
+              color #43ABFF
+
+            text.k
+              color #EF4C1D
 
           .title
             font-weight bold
 
           .desc
-            color #666
-            font-size 28rpx
             margin-top 10rpx
+            display flex
+            font-size 24rpx
 
-            &>text
+            text
               margin-right 20rpx
+              color #666
           
           .date
-            color #666
-            font-size 28rpx
-            margin-top 10rpx
+            font-size 24rpx
+            margin-top 5rpx
 
             &>text
               margin-right 20rpx
+              color #666
 </style>

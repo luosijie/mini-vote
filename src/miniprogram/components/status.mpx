@@ -1,0 +1,64 @@
+<template>
+  <view class="status" wx:style="{{ {color} }}">
+    {{ name }}
+  </view>
+</template>
+
+<script>
+  import { createPage } from '@mpxjs/core'
+  const map = {
+    pre: {
+      color: '#FFCB1E',
+      name: '未开始'
+    },
+    ing: {
+      color: '#40A9FF',
+      name: '进行中'
+    },
+    end: {
+      color: '#cccccc',
+      name: '已结束'
+    }
+  }
+  createPage({
+    properties: {
+      state: {
+        type: String,
+        value: ''
+      }
+    },
+    computed: {
+      name () {
+        return map[this.state].name
+      },
+      color () {
+        return map[this.state].color
+      }
+    }
+  })
+</script>
+
+<script type="application/json">
+  {
+    "usingComponents": {
+    }
+  }
+</script>
+
+<style lang="stylus" scoped>
+.main
+  box-sizing border-box
+  padding 20rpx
+  height 100vh
+  padding-bottom 130rpx
+  display flex
+  justify-content center
+  flex-direction column
+  align-items center
+
+  .logo
+    width 200rpx
+    height 200rpx
+    background #f2f2f2
+    border-radius 50%
+</style>

@@ -165,19 +165,23 @@ createPage({
       console.log('form-data', this.formData)
       const valid = this.validateFormData()
       if (!valid) return
-      console.log('addRecord', this.formData, wx.cloud)
+      // console.log('addRecord', this.formData, wx.cloud)
       const res = await wx.cloud.callFunction({
         name: 'addRecord',
         data: this.formData
       })
+      console.log('新增投票成功', res)
       if (res.result.success) {
         wx.showToast({
           title: '新增投票成功',
           icon: 'success'
         })
-        wx.redirectTo({
-          url: `vote-detail?_id=${res.result._id}`
-        })
+        // 跳转到投票详情页
+        setTimeout(() => {
+          wx.redirectTo({
+            url: `vote-detail?_id=${res.result._id}&type=${this.formData.type}`
+          })
+        }, 1500)
       }
     },
     remove (index) {

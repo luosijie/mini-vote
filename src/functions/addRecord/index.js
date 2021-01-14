@@ -13,6 +13,7 @@ exports.main = async (event, context) => {
     desc: event.desc,
     startTime: event.startTime,
     endTime: event.endTime,
+    anonymous: event.anonymous,
     type: event.type,
     state: 'ing'
   }
@@ -27,7 +28,6 @@ exports.main = async (event, context) => {
       vote_id: res._id,
       ...ele
     }
-    console.log('option--->', option)
     return optionCollection.add({
       data: option
     })
@@ -36,6 +36,8 @@ exports.main = async (event, context) => {
   resOptions = resOptions.map(e =>  e._id)
   console.log('res after add', res, resOptions)
   return {
+    success: true,
+    message: '新增投票成功',
     ...res
   }
 }
