@@ -9,8 +9,8 @@
   createApp({
     onLaunch () {
       wx.cloud.init({
-        env: 'pro-4grvcade3e1bbbec'
         // env: 'dev-2g1tva2ifc3f29ec'
+        env: 'pro-4grvcade3e1bbbec'
       })
       wx.getUserInfo()
     }

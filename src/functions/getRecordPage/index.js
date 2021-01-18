@@ -1,5 +1,8 @@
 /**
- * 获取我的投票记录
+ * 获取我的投票记录分页
+ * @param {Number} no 页码
+ * @param {Number} size 页数
+ * @return {Object} 投票数据列表和总数
  */
 const cloud = require('wx-server-sdk')
 cloud.init({
@@ -10,15 +13,11 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const wxContext = cloud.getWXContext()
   const size = event.size
+  //获取接口参数
   const no = event.no
   const OPENID = wxContext.OPENID
   const voteCollection = db.collection('votes')
-  // const votes = await voteCollection.where({
-  //   creator: OPENID
-  // })
-  // .skip((no - 1) * size)
-  // .limit(size)
-  // .get()
+  // 查找集合中的投票数据
   const votes = await voteCollection.aggregate()
   .match({
     creator: OPENID
@@ -29,13 +28,16 @@ exports.main = async (event, context) => {
     foreignField: 'vote_id',
     as: 'options'
   })
+  .sort({
+    _id: -1
+  })
   .skip((no - 1) * size)
   .limit(size)
   .end()
   // 计算总数
   const total = await voteCollection.count()
-  console.log('聚合操作', votes)
   let data = votes.list
+  // 计算投票状态
   if (data.length) {
     data = data.map(e => {
       if (e.state !== 'end') {
@@ -48,7 +50,7 @@ exports.main = async (event, context) => {
           e.state = 'end'
         }
       }
-      // 统计投票人数
+      // 统计已投票人数
       let votedTotal = 0
       const options = e.options
       options.forEach(o => {

@@ -1,6 +1,8 @@
 <template>
   <view class="main">
-    <view class="logo"></view>
+    <view class="logo">
+      <i class="iconfont icon-zan"></i>
+    </view>
     <button
       class="submit"
       open-type="getUserInfo"
@@ -61,8 +63,15 @@
   .logo
     width 200rpx
     height 200rpx
-    background #f2f2f2
+    background white
+    border 20rpx solid #f2f2f2
     border-radius 50%
+    display flex
+    justify-content center
+    align-items center
+    i 
+      color #40a9ff
+      font-size 60rpx
 
   .submit
     width 300rpx

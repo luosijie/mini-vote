@@ -1,12 +1,13 @@
-const cloud = require('wx-server-sdk')
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-})
+
 /**
  * 校验图片合法性
  * @param {*} event.fileID 微信云存储的图片ID
  * @return {Number} 0:校验失败；1:校验通过
  */
+const cloud = require('wx-server-sdk')
+cloud.init({
+  env: cloud.DYNAMIC_CURRENT_ENV
+})
 exports.main = async (event, context) => {
   const contentType = 'image/png'
   const fileID = event.fileID

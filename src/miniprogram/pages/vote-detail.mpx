@@ -7,12 +7,13 @@
         <status state="{{ detail.state }}" style="margin-right: 20rpx"/>
         <text class="date">截止日期: {{ detail.endTime }}</text>
       </view>
+      <!-- PK投票-详情信息 -->
       <view class="info info-pk" wx:if="{{ detail.type === 'pk' }}">
         <text class="title">{{ detail.title }}</text>
         <view class="pkers">
           <view class="option">
             <view class="pker">
-              <image src="{{ detail.options[0].image }}" wx:if="{{ detail.options[0].image }} }}"></image>
+              <image src="{{ detail.options[0].image }}" wx:if="{{ detail.options[0].image }}"></image>
               <text class="name">{{ detail.options[0].title }}</text>
             </view>
             <text class="num blue">{{ detail.options[0].users.length }}</text>
@@ -20,17 +21,17 @@
           <text class="pk">PK</text>
           <view class="option">
             <view class="pker">
-              <image src="{{ detail.options[1].image }}" wx:if="{{ detail.options[0].image }} }}"></image>
+              <image src="{{ detail.options[1].image }}" wx:if="{{ detail.options[0].image }}"></image>
               <text class="name">{{ detail.options[1].title }}</text>
             </view>
             <text class="num red">{{ detail.options[1].users.length }}</text>
           </view>
         </view>
         <view class="shape">
-          <view class="blue" wx:style="{{ {width: `${detail.options[0].users.length / votedTotal * 100}%`} }}"></view>
-          <view class="red"></view>
+          <view class="blue" wx:style="{{ { width: detail.options[0].width } }}"></view>
+          <view class="red" wx:style="{{ { width: detail.options[1].width } }}"></view>
         </view>
-        <view class="actions">
+        <view class="actions" wx:if="{{ !isVoted }}">
           <view class="blue" bindtap="vote(detail.options[0]._id)">
             <i class="iconfont icon-zan"></i>
           </view>
@@ -38,11 +39,12 @@
             <i class="iconfont icon-zan"></i>
           </view>
         </view>
-        <view class="show-support">
-          <text>查看支持者</text>
-          <text>查看支持者</text>
+        <view class="show-support" wx:if="{{ !detail.anonymous }}">
+          <text bindtap="showPopVoter(0)">查看支持者</text>
+          <text bindtap="showPopVoter(1)">查看支持者</text>
         </view>
       </view>
+      <!-- 普通投票-详情信息 -->
       <view class="info" wx:if="{{ detail.type === 'normal' }}">
         <view class="title">{{ detail.title }}</view>
         <view class="desc">{{ detail.desc }}</view>
@@ -53,8 +55,9 @@
           <text class="name">发起人：{{ detail.creator.nickName }}</text>
         </view>
         <text class="end" style="margin-right: 20rpx" wx:if="{{ detail.anonymous }}">匿名投票</text>
-        <text class="end" style="margin-right: 20rpx">每人最少{{ detail.min }}投票，最多投{{ detail.max }}票</text>
+        <!-- <text class="end" style="margin-right: 20rpx">每人最少{{ detail.min }}投票，最多投{{ detail.max }}票</text> -->
       </view>
+      <!-- 普通投票-选项信息 -->
       <view class="options" wx:if="{{ detail.type === 'normal' }}">
         <view class="item" wx:for="{{ detail.options }}" wx:key="title">
           <view class="content" bindtap="select(item._id)">
@@ -72,13 +75,14 @@
                 {{  item.desc }}
               </view>
             </view>
-            <view class="action" wx:if="{{ !isVoted }}">
+            <view class="action" wx:if="{{ !isVoted && detail.state === 'ing' }}">
               <i class="iconfont icon-check" wx:if="{{ item._id === selected }}"></i>
               <i class="iconfont icon-uncheck" wx:else></i>
             </view>
             <text class="nums" wx:else>{{ item.users.length }}票</text>
           </view>
-          <view class="users">
+          <!-- 投票人信息：匿名状态隐藏 -->
+          <view class="users" wx:if="{{ !detail.anonymous }}">
             <view class="item" wx:for="{{ item.users }}" wx:if="{{ index < 14 }}" wx:key="avatarUrl">
               <image src="{{ item.avatarUrl }}" mode="aspectFill"></image>
             </view>
@@ -88,8 +92,15 @@
           </view>
         </view>
       </view>
-      <view class="submit" bindtap="submit" wx:if="{{ !isVoted && detail.type === 'normal' }}">提交</view>
+      <view class="submit" bindtap="submit" wx:if="{{ !isVoted && detail.type === 'normal' && detail.state === 'ing' }}">提交</view>
     </view>
+    <!-- 弹窗-显示投票人信息 -->
+    <pop visible="{{ popVoters.visible }}" bind:close="popVotersClose">
+      <views class="voter" wx:for="{{ popVoters.data }}">
+        <image src="{{ item.avatarUrl }}"></image>
+        <text>{{ item.nickName }}</text>
+      </views>
+    </pop>
   </view>
 </template>
 
@@ -102,7 +113,10 @@ createPage({
     user: null,
     isVoted: false,
     showImage: false,
-    votedTotal: 0
+    popVoters: {
+      visible: false,
+      data: []
+    }
   },
   methods: {
     async getDetail (_id) {
@@ -113,7 +127,6 @@ createPage({
         }
       })
       this.detail = res.result.data
-      console.log('投票详情：', this.detail)
       const options = this.detail.options
       // 判断是否显示图片
       this.showImage = options.find(e => e.image)
@@ -121,9 +134,7 @@ createPage({
       for (let i = 0; i < options.length; i++) {
         if (this.isVoted) break
         const users = options[i].users
-        if (users.length) {
-          this.votedTotal += users.length
-        }
+        options[i].width = `${users.length / this.detail.votedTotal * 100}%`
         for (let j = 0; j < users.length; j++) {
           if (users[j].OPENID === this.user.OPENID) {
             this.isVoted = true
@@ -131,6 +142,7 @@ createPage({
           }
         }
       }
+      console.log('投票详情：', this.detail)
     },
     select (_id) {
       if (this.isVoted) return
@@ -172,9 +184,32 @@ createPage({
         return
       }
       this.vote(this.selected)
+    },
+    popVotersClose () {
+      this.popVoters.visible = false
+    },
+    showPopVoter (index) {
+      const users = this.detail.options[index].users
+      if (users && users.length) {
+        this.popVoters.visible = true
+        this.popVoters.data = users
+      } else {
+        wx.showToast({
+          title: '没人投票',
+          icon: 'none'
+        })
+      }
     }
   },
   onLoad (e) {
+    const user = wx.getStorageSync('user')
+    console.log('user', user)
+    if (!user) {
+      wx.navigateTo({
+        url: 'login'
+      })
+      return
+    }
     const _id = e._id
     console.log(this)
     this.user = wx.getStorageSync('user')
@@ -189,7 +224,8 @@ createPage({
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#ffffff",
     "usingComponents": {
-      "status": "../components/status"
+      "status": "../components/status",
+      "pop": "../components/pop"
     },
     // "disableScroll" : true
   }
@@ -435,6 +471,18 @@ createPage({
             image
               width 100%
               height 100%
+    
+  .voter
+    display flex
+    aligin-items center
+    image
+      width 60rpx
+      height 60rpx 
+      border-radius 50%
+      margin-right 10rpx
+    
+    text
+      line-height 60rpx
 
   .submit
     position fixed

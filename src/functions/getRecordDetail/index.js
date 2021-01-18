@@ -1,5 +1,7 @@
 /**
- * 获取我的投票记录
+ * 获取投票详情
+ * @param {String} _id 投票_id
+ * @return {Object} 投票数据
  */
 const cloud = require('wx-server-sdk')
 cloud.init({
@@ -10,8 +12,9 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const _id = event._id
   const OPENID = cloud.getWXContext().OPENID
-  // 查找投票信息
+  // 查找集合中的投票数据
   const voteCollection = db.collection('votes')
+  // 聚合联表查询
   const voteQuery = await voteCollection
   .aggregate()
   .match({ _id })
@@ -23,13 +26,13 @@ exports.main = async (event, context) => {
   })
   .end()
   let vote = {}
-  console.log('vote-query', voteQuery, _id)
   if (voteQuery && voteQuery.list.length) {
     vote = voteQuery.list[0]
     vote.creator = vote.creator[0]
+    // 判断是否当前投票的发起人
     vote.isOwner = vote.creator.OPENID === OPENID
 
-    // 查找选项信息
+    // 查找集合中的选项数据
     const optionsCollection = db.collection('options')
     const optionsQuary = await optionsCollection
     .aggregate()
@@ -42,7 +45,15 @@ exports.main = async (event, context) => {
     })
     .end()
     vote.options = optionsQuary.list
-    
+    // 统计已经投票的人数
+    let votedTotal = 0
+    vote.options.forEach(e => {
+      if (e.users && e.users.length) {
+        votedTotal += e.users.length
+      }
+    })
+    vote.votedTotal = votedTotal
+    // 计算当前投票的状态
     if (vote.state !== 'end') {
       // 未开始
       if (new Date().getTime() < new Date(vote.startTime).getTime()) {
@@ -60,7 +71,7 @@ exports.main = async (event, context) => {
   } else {
     return {
       success: false,
-      data: '找不到投票信息'
+      message: '找不到投票信息'
     }
   }
 }
